@@ -1,4 +1,4 @@
-package samlConfiguration;
+package com.IBatisConfigurationThroughXml.samlConfiguration;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
