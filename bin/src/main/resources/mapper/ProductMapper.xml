@@ -1,0 +1,92 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper
+	namespace="com.IBatisConfigurationThroughXml.Repository.ProductMapper">
+
+
+	<resultMap id="userDetailsResultMap"
+		type="com.IBatisConfigurationThroughXml.Entity.UserDetails">
+		<id property="id" column="id" />
+		<result property="username" column="username" />
+	</resultMap>
+	<resultMap id="UserWithRoleResultMapSP"
+		type="com.IBatisConfigurationThroughXml.Entity.UserRequest">
+		<id property="id" column="id" />
+		<result property="username" column="username" />
+		<association property="role"
+			javaType="com.IBatisConfigurationThroughXml.Entity.Role">
+			<id property="id" column="role_id" />
+			<result property="name" column="role_name" />
+		</association>
+	</resultMap>
+
+
+	<insert id="insertUserRequest"
+		parameterType="com.IBatisConfigurationThroughXml.Entity.UserRequest">
+		INSERT INTO usersM (username, role) VALUES (#{username},
+		#{role.id})
+	</insert>
+
+	<select id="getAllUsers" resultMap="UserWithRoleResultMapSP">
+		SELECT u.id, u.username,
+		r.id
+		as role_id, r.name as role_name
+		FROM usersM u
+		LEFT JOIN roles r ON
+		u.role = r.id
+	</select>
+
+	<select id="getUserRequestById" parameterType="Long"
+		resultMap="UserWithRoleResultMapSP">
+		SELECT u.id, u.username, r.id as role_id, r.name as
+		role_name
+		FROM usersM u
+		LEFT JOIN roles r ON u.role = r.id
+		WHERE u.id =
+		#{id}
+	</select>
+	<delete id="deleteUserById" parameterType="long">
+		DELETE FROM usersM
+		WHERE id = #{id}
+	</delete>
+	<update id="updateUser"
+		parameterType="com.IBatisConfigurationThroughXml.Entity.UserRequest">
+		UPDATE usersM
+		SET username = #{username}, role =
+		#{role.id}
+		WHERE id = #{id}
+	</update>
+
+	<select id="callStoredProcedure" parameterType="Map"
+		resultMap="UserWithRoleResultMapSP">
+		{call GetUserWithRoleById (#{id, mode=IN,
+		jdbcType=INTEGER})}
+	</select>
+
+
+	<resultMap id="UserResultMap" type="java.util.HashMap">
+		<result column="id" property="id" />
+		<result column="username" property="username" />
+	</resultMap>
+
+	<resultMap id="RoleResultMap" type="java.util.HashMap">
+		<result column="role_id" property="roleId" />
+		<result column="role_name" property="roleName" />
+	</resultMap>
+
+	<select id="multiResultSetStored" statementType="CALLABLE"
+		resultMap="UserResultMap,RoleResultMap">
+		{call multiResultSetStored(#{id, mode=IN, jdbcType=INTEGER})}
+	</select>
+
+
+	<select id="multiResultSetStoredWith" parameterType="java.lang.String" resultMap="userDetailsResultMap"
+		statementType="CALLABLE">
+		{call multiResultSetStoredWith(#{username, mode=IN, jdbcType=NVARCHAR})}
+	</select>
+
+
+
+</mapper>
